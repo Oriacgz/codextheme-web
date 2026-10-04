@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer, request } from 'node:http';
-import proxy from '../../api/community.js';
+import proxy from '../../front-end/api/community.js';
 import { isProduction } from '../src/config/environment.js';
 import { cookieName, secret } from '../src/auth/security.js';
 

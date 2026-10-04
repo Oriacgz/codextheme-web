@@ -2,7 +2,7 @@
 
 A community theme library for codexskin. Browse theme previews, share packages, download themes and discuss them with other users.
 
-Built with React, Vite, Tailwind CSS and Motion, with a Node.js API, Prisma and PostgreSQL. The frontend and backend are separate npm workspaces hosted on Vercel (frontend) and Render (backend).
+Built with React, Vite, Tailwind CSS and Motion, with a Node.js API, Prisma and PostgreSQL. The frontend and backend are independent npm projects hosted on Vercel (frontend) and Render (backend).
 
 ## Features
 
@@ -21,21 +21,22 @@ back-end/prisma/         Database schema and versioned migrations
 back-end/scripts/        Database, administration and maintenance commands
 back-end/test/           Automated tests and fixtures
 back-end/.env.example    Server configuration template
-api/community.js        Vercel entry point for the backend handler
+front-end/api/community.js Vercel proxy to Render
 docs/                   Architecture, package specification and audit findings
-package.json            Workspace commands
-package-lock.json       Reproducible dependency versions
-vercel.json             Deployment and security-header configuration
+front-end/package.json  Frontend commands
+back-end/package.json   Backend commands
+front-end/vercel.json   Deployment and security-header configuration
 ```
 
-Run commands from the repository root. Vercel must deploy this root, not either workspace separately. The local development server forwards `/api/community` to the same handler used in production.
+Run frontend commands from `front-end` and backend commands from `back-end`. Each has its own package manifest and lockfile. Select the corresponding folder as each service’s Root Directory. The local development server forwards `/api/community` to the same handler used in production.
 
 ## Local development
 
 Use Node.js 24 and npm.
 
 ```sh
-npm ci
+cd back-end
+npm ci --include=dev
 npm run db:generate
 npm run db:local
 ```
@@ -49,7 +50,10 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 Leave `BLOB_READ_WRITE_TOKEN` empty for local filesystem storage. In another terminal:
 
 ```sh
+cd back-end
 npm run db:migrate
+cd ../front-end
+npm ci
 npm run dev
 ```
 
@@ -61,12 +65,12 @@ The browser calls `/api/community` on the frontend domain. A small Vercel proxy 
 
 ### Render web service
 
-Deploy the repository root as a Node.js web service using Node.js 24.
+Create a Render Node.js web service with Root Directory `back-end` and Node.js 24.
 
 | Setting           | Value                                |
 | ----------------- | ------------------------------------ |
-| Build command     | `npm ci && npm run db:generate`      |
-| Start command     | `npm run start --workspace back-end` |
+| Build command     | `npm ci --include=dev && npm run db:generate`      |
+| Start command     | `npm start` |
 | Health check path | `/health`                            |
 
 The server binds to `0.0.0.0` and Render's supplied `PORT`. Apply `npm run db:migrate` against the intended database before using the service. The build does not apply migrations automatically.
@@ -89,7 +93,7 @@ PostgreSQL stores accounts and theme metadata. Private Vercel Blob stores upload
 
 ### Vercel frontend
 
-Deploy the repository root with framework Vite, Node.js 24, install command `npm ci`, build command `npm run build --workspace front-end` and output directory `front-end/dist`.
+Select `front-end` as the Vercel Root Directory. Use framework Vite, Node.js 24, install command `npm ci --workspaces=false`, build command `npm run build` and output directory `dist`. Leave the option to include files outside the Root Directory disabled. The frontend has its own package manifest, lockfile, Vercel configuration and API proxy; its production build does not import the backend or require Prisma generation.
 
 Set only this application variable on **Vercel**:
 
@@ -114,16 +118,18 @@ There is no default administrator, automatic first-user promotion or administrat
 ## Verification and maintenance
 
 ```sh
+cd back-end
 npm test
 npm run test:integration
+npm audit
+cd ../front-end
 npm run build
-npm run format:check
 npm audit
 ```
 
 Integration tests require a migrated local database and local storage. They create disposable records, verify permissions and publishing flows, and remove their fixtures. Cloud database hosts and Blob storage are rejected by the test script.
 
-Use `npm run format` to format maintained source files. Run `npm run maintenance` periodically with the intended database and storage configuration to remove expired sessions, rate buckets and unpublished uploads. Upload cleanup processes up to 100 pending records per run and preserves published themes.
+Run `npm run maintenance` from `back-end` periodically with the intended database and storage configuration to remove expired sessions, rate buckets and unpublished uploads. Upload cleanup processes up to 100 pending records per run and preserves published themes.
 
 See the [architecture](docs/ARCHITECTURE.md), [package format](docs/PACKAGE-FORMAT.md) and [audit findings](docs/AUDIT-2026-10-04.md).
 

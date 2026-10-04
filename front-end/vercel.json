@@ -1,8 +1,8 @@
 {
   "framework": "vite",
-  "installCommand": "npm ci",
-  "buildCommand": "npm run build --workspace front-end",
-  "outputDirectory": "front-end/dist",
+  "installCommand": "npm ci --workspaces=false",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "functions": {
     "api/community.js": {
       "maxDuration": 60
