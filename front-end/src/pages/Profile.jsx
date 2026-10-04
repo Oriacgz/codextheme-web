@@ -1,16 +1,21 @@
-import { useEffect, useState } from 'react';
-import Avatar from '../components/Avatar';
-import ThemeCard from '../components/ThemeCard';
-import { request } from '../services/api';
-import { initialAvatarChoices, shuffleAvatarChoices } from '../services/avatars';
+import { useEffect, useState } from "react";
+import Avatar from "../components/Avatar";
+import ThemeCard from "../components/ThemeCard";
+import { request } from "../services/api";
+import {
+  initialAvatarChoices,
+  shuffleAvatarChoices,
+} from "../services/avatars";
 export default function Profile({ user, ready, setUser, navigate }) {
-  const [name, setName] = useState(user?.name || ''),
+  const [name, setName] = useState(user?.name || ""),
     [avatar, setAvatar] = useState(user?.avatar || 0),
     [themes, setThemes] = useState([]),
     [busy, setBusy] = useState(false),
-    [error, setError] = useState(''),
-    [notice, setNotice] = useState('');
-  const [choices, setChoices] = useState(() => initialAvatarChoices(user?.avatar || 0)),
+    [error, setError] = useState(""),
+    [notice, setNotice] = useState("");
+  const [choices, setChoices] = useState(() =>
+      initialAvatarChoices(user?.avatar || 0),
+    ),
     [shuffleCount, setShuffleCount] = useState(0);
   function shuffle() {
     setChoices((previous) => shuffleAvatarChoices(avatar, previous));
@@ -23,7 +28,7 @@ export default function Profile({ user, ready, setUser, navigate }) {
     setAvatar(user.avatar);
     setChoices(initialAvatarChoices(user.avatar));
     setShuffleCount(0);
-    request('themes&mine=1', { signal: controller.signal })
+    request("themes&mine=1", { signal: controller.signal })
       .then((data) => setThemes(data.themes))
       .catch((error) => {
         if (!controller.signal.aborted) setError(error.message);
@@ -34,12 +39,15 @@ export default function Profile({ user, ready, setUser, navigate }) {
   async function save(event) {
     event.preventDefault();
     setBusy(true);
-    setNotice('');
-    setError('');
+    setNotice("");
+    setError("");
     try {
-      const data = await request('profile', { method: 'PATCH', body: { name, avatar } });
+      const data = await request("profile", {
+        method: "PATCH",
+        body: { name, avatar },
+      });
       setUser(data.user);
-      setNotice('Saved. Looking like yourself.');
+      setNotice("Saved. Looking like yourself.");
     } catch (e) {
       setError(e.message);
     } finally {
@@ -68,7 +76,11 @@ export default function Profile({ user, ready, setUser, navigate }) {
       </div>
       <div className="profile-layout">
         <aside className="profile-summary">
-          <Avatar user={{ ...user, avatar, name }} viewerId={user.id} size={132} />
+          <Avatar
+            user={{ ...user, avatar, name }}
+            viewerId={user.id}
+            size={132}
+          />
           <h2>{name}</h2>
           <p>{user.email}</p>
           <span>Watches your cursor. Reacts to a hello.</span>
@@ -113,15 +125,15 @@ export default function Profile({ user, ready, setUser, navigate }) {
                   size={54}
                   onChoose={() => {
                     setAvatar(seed);
-                    setNotice('');
+                    setNotice("");
                   }}
                 />
               ))}
             </div>
             <p className="avatar-shuffle-status" role="status">
               {shuffleCount
-                ? 'Fresh choices ready. Your selected avatar stays until you choose another.'
-                : 'Choose a face, then save your profile.'}
+                ? "Fresh choices ready. Your selected avatar stays until you choose another."
+                : "Choose a face, then save your profile."}
             </p>
           </div>
           {error && (
@@ -136,7 +148,7 @@ export default function Profile({ user, ready, setUser, navigate }) {
           )}
           <div className="form-actions">
             <button className="button primary" disabled={busy}>
-              {busy ? 'Saving…' : 'Save profile'}
+              {busy ? "Saving…" : "Save profile"}
             </button>
             <span>Your choice follows you across the community.</span>
           </div>
@@ -152,12 +164,23 @@ export default function Profile({ user, ready, setUser, navigate }) {
         {themes.length ? (
           <div className="theme-grid">
             {themes.map((theme) => (
-              <ThemeCard key={theme.id} theme={theme} viewerId={user.id} navigate={navigate} />
+              <ThemeCard
+                key={theme.id}
+                theme={theme}
+                viewerId={user.id}
+                navigate={navigate}
+                onDeleted={(id) =>
+                  setThemes((current) =>
+                    current.filter((theme) => theme.id !== id),
+                  )
+                }
+              />
             ))}
           </div>
         ) : (
           <div className="quiet-empty">
-            Your first theme has a place here. <a href="#/upload">Share it with the community.</a>
+            Your first theme has a place here.{" "}
+            <a href="#/upload">Share it with the community.</a>
           </div>
         )}
       </section>

@@ -1,49 +1,62 @@
-import { applyVote } from '../services/votes';
-import { ThumbsUp, ThumbsDown } from 'lucide-react';
-import ThemePreview from '../components/ThemePreview';
-import { useEffect, useRef, useState } from 'react';
-import { request, imageUrl, downloadUrl } from '../services/api';
-import Avatar from '../components/Avatar';
-import Icon from '../components/Icon';
+import DeleteThemeButton from "../components/DeleteThemeButton";
+import { applyVote } from "../services/votes";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
+import ThemePreview from "../components/ThemePreview";
+import { useEffect, useRef, useState } from "react";
+import { request, imageUrl, downloadUrl } from "../services/api";
+import Avatar from "../components/Avatar";
+import Icon from "../components/Icon";
 export default function Theme({ id, user, navigate }) {
   const [data, setData] = useState(null),
-    [error, setError] = useState(''),
+    [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
-    [comment, setComment] = useState(''),
+    [comment, setComment] = useState(""),
     [refresh, setRefresh] = useState(0);
   const mutation = useRef(null);
   useEffect(() => () => mutation.current?.abort(), []);
   useEffect(() => {
     setData(null);
-    setError('');
+    setError("");
   }, [id]);
   useEffect(() => {
     const controller = new AbortController();
-    request('themes/' + id, { signal: controller.signal })
+    request("themes/" + id, { signal: controller.signal })
       .then(setData)
       .catch((e) => {
         if (!controller.signal.aborted) setError(e.message);
       });
     return () => controller.abort();
   }, [id, refresh]);
-  async function mutate(route, body, method = 'POST') {
+  async function mutate(route, body, method = "POST") {
     if (!user) {
-      navigate('login');
+      navigate("login");
       return;
     }
     if (mutation.current) return;
     const controller = new AbortController();
     mutation.current = controller;
-    const voting = route.endsWith('/vote'),
+    const voting = route.endsWith("/vote"),
       previous = data.theme;
     setBusy(true);
-    setError('');
-    if (voting) setData((current) => ({ ...current, theme: applyVote(current.theme, body.value) }));
+    setError("");
+    if (voting)
+      setData((current) => ({
+        ...current,
+        theme: applyVote(current.theme, body.value),
+      }));
     try {
-      const result = await request(route, { method, body, signal: controller.signal });
-      if (voting) setData((current) => ({ ...current, theme: { ...current.theme, ...result } }));
+      const result = await request(route, {
+        method,
+        body,
+        signal: controller.signal,
+      });
+      if (voting)
+        setData((current) => ({
+          ...current,
+          theme: { ...current.theme, ...result },
+        }));
       else {
-        if (method === 'POST' && route.endsWith('/comments')) setComment('');
+        if (method === "POST" && route.endsWith("/comments")) setComment("");
         setRefresh((n) => n + 1);
       }
     } catch (error) {
@@ -62,8 +75,8 @@ export default function Theme({ id, user, navigate }) {
   if (!data)
     return (
       <section className="content-page">
-        <div className="notice" role={error ? 'alert' : 'status'}>
-          {error || 'Opening this theme…'}
+        <div className="notice" role={error ? "alert" : "status"}>
+          {error || "Opening this theme…"}
         </div>
         <a href="#/community">← Back to the collection</a>
       </section>
@@ -83,10 +96,10 @@ export default function Theme({ id, user, navigate }) {
             <div>
               <strong>{theme.author.name}</strong>
               <span>
-                Shared{' '}
+                Shared{" "}
                 {new Date(theme.createdAt).toLocaleDateString(undefined, {
-                  month: 'long',
-                  day: 'numeric',
+                  month: "long",
+                  day: "numeric",
                 })}
               </span>
             </div>
@@ -136,8 +149,12 @@ export default function Theme({ id, user, navigate }) {
               <button
                 disabled={busy}
                 aria-pressed={theme.vote === 1}
-                className={theme.vote === 1 ? 'active' : ''}
-                onClick={() => mutate(`themes/${id}/vote`, { value: theme.vote === 1 ? 0 : 1 })}
+                className={theme.vote === 1 ? "active" : ""}
+                onClick={() =>
+                  mutate(`themes/${id}/vote`, {
+                    value: theme.vote === 1 ? 0 : 1,
+                  })
+                }
               >
                 <ThumbsUp size={17} aria-hidden="true" />
                 Like <strong>{theme.likes}</strong>
@@ -145,20 +162,30 @@ export default function Theme({ id, user, navigate }) {
               <button
                 disabled={busy}
                 aria-pressed={theme.vote === -1}
-                className={theme.vote === -1 ? 'active' : ''}
-                onClick={() => mutate(`themes/${id}/vote`, { value: theme.vote === -1 ? 0 : -1 })}
+                className={theme.vote === -1 ? "active" : ""}
+                onClick={() =>
+                  mutate(`themes/${id}/vote`, {
+                    value: theme.vote === -1 ? 0 : -1,
+                  })
+                }
               >
                 <ThumbsDown size={17} aria-hidden="true" />
                 Dislike <strong>{theme.dislikes}</strong>
               </button>
               <span>
-                {theme.comments} {theme.comments === 1 ? 'comment' : 'comments'}
+                {theme.comments} {theme.comments === 1 ? "comment" : "comments"}
               </span>
             </div>
           </section>
         </div>
       </div>
 
+      {user?.id === theme.author.id && (
+        <DeleteThemeButton
+          theme={theme}
+          onDeleted={() => navigate("community")}
+        />
+      )}
       <section className="comments-section">
         <div className="section-label">
           <div>
@@ -166,7 +193,7 @@ export default function Theme({ id, user, navigate }) {
             <h2>Join the conversation.</h2>
           </div>
           <span>
-            {theme.comments} {theme.comments === 1 ? 'comment' : 'comments'}
+            {theme.comments} {theme.comments === 1 ? "comment" : "comments"}
           </span>
         </div>
         {error && (
@@ -195,7 +222,10 @@ export default function Theme({ id, user, navigate }) {
               />
               <div>
                 <span>{comment.length}/1000</span>
-                <button className="button primary small" disabled={busy || !comment.trim()}>
+                <button
+                  className="button primary small"
+                  disabled={busy || !comment.trim()}
+                >
                   Post comment
                 </button>
               </div>
@@ -217,22 +247,27 @@ export default function Theme({ id, user, navigate }) {
                 <div className="comment-heading">
                   <strong>{c.author.name}</strong>
                   <time>{new Date(c.createdAt).toLocaleDateString()}</time>
-                  {user && (c.author.id === user.id || user.role === 'ADMIN') && (
-                    <button
-                      className="text-button"
-                      disabled={busy}
-                      onClick={() => mutate('comments/' + c.id, { hidden: true }, 'PATCH')}
-                    >
-                      Remove
-                    </button>
-                  )}
+                  {user &&
+                    (c.author.id === user.id || user.role === "ADMIN") && (
+                      <button
+                        className="text-button"
+                        disabled={busy}
+                        onClick={() =>
+                          mutate("comments/" + c.id, { hidden: true }, "PATCH")
+                        }
+                      >
+                        Remove
+                      </button>
+                    )}
                 </div>
                 <p>{c.body}</p>
               </div>
             </article>
           ))}
           {!comments.length && (
-            <p className="quiet-empty">No comments yet. A kind word is a good start.</p>
+            <p className="quiet-empty">
+              No comments yet. A kind word is a good start.
+            </p>
           )}
         </div>
       </section>

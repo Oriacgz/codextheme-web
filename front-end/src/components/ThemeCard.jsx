@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
-import ThemePreview from './ThemePreview';
-import Avatar from './Avatar';
-import Icon from './Icon';
-import { imageUrl, request } from '../services/api';
-export default function ThemeCard({ theme, viewerId, navigate }) {
+import DeleteThemeButton from "./DeleteThemeButton";
+import { useEffect, useRef, useState } from "react";
+import ThemePreview from "./ThemePreview";
+import Avatar from "./Avatar";
+import Icon from "./Icon";
+import { imageUrl, request } from "../services/api";
+export default function ThemeCard({ theme, viewerId, navigate, onDeleted }) {
   const element = useRef(null),
     [preview, setPreview] = useState(null),
     [previewError, setPreviewError] = useState(false);
@@ -21,7 +22,7 @@ export default function ThemeCard({ theme, viewerId, navigate }) {
             if (!controller.signal.aborted) setPreviewError(true);
           });
       },
-      { rootMargin: '150px' },
+      { rootMargin: "150px" },
     );
     observer.observe(element.current);
     return () => {
@@ -34,16 +35,16 @@ export default function ThemeCard({ theme, viewerId, navigate }) {
       <button
         ref={element}
         className="theme-preview"
-        onClick={() => navigate('theme/' + theme.id)}
-        aria-label={'Preview ' + theme.name}
+        onClick={() => navigate("theme/" + theme.id)}
+        aria-label={"Preview " + theme.name}
       >
         {preview ? (
           <ThemePreview theme={preview} image={imageUrl(theme.id)} />
         ) : (
           <div className="preview-placeholder" role="status">
             {previewError
-              ? 'Preview unavailable · open theme to retry'
-              : 'Loading theme appearance…'}
+              ? "Preview unavailable · open theme to retry"
+              : "Loading theme appearance…"}
           </div>
         )}
         <span>
@@ -56,12 +57,20 @@ export default function ThemeCard({ theme, viewerId, navigate }) {
           {theme.featured && <span>EDITOR’S PICK</span>}
         </div>
         <h3>
-          <button onClick={() => navigate('theme/' + theme.id)}>{theme.name}</button>
+          <button onClick={() => navigate("theme/" + theme.id)}>
+            {theme.name}
+          </button>
         </h3>
         <p>{theme.description}</p>
-        <button className="theme-card-action" onClick={() => navigate('theme/' + theme.id)}>
+        <button
+          className="theme-card-action"
+          onClick={() => navigate("theme/" + theme.id)}
+        >
           View theme <Icon name="ArrowRight" />
         </button>
+        {viewerId === theme.author.id && onDeleted && (
+          <DeleteThemeButton theme={theme} onDeleted={onDeleted} />
+        )}
         <div className="theme-byline">
           <div>
             <Avatar user={theme.author} viewerId={viewerId} size={30} />

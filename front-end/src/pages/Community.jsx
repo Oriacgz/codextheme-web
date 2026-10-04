@@ -1,14 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
-import { request } from '../services/api';
-import Icon from '../components/Icon';
-import ThemeCard from '../components/ThemeCard';
-const categories = ['All', 'Dark', 'Light', 'Nature', 'Illustration', 'Minimal'];
+import { useEffect, useRef, useState } from "react";
+import { request } from "../services/api";
+import Icon from "../components/Icon";
+import ThemeCard from "../components/ThemeCard";
+const categories = [
+  "All",
+  "Dark",
+  "Light",
+  "Nature",
+  "Illustration",
+  "Minimal",
+];
 export default function Community({ user, navigate }) {
-  const [search, setSearch] = useState(''),
-    [category, setCategory] = useState('All'),
+  const [search, setSearch] = useState(""),
+    [category, setCategory] = useState("All"),
     [themes, setThemes] = useState([]),
     [loading, setLoading] = useState(true),
-    [error, setError] = useState(''),
+    [error, setError] = useState(""),
     [next, setNext] = useState(null),
     [refresh, setRefresh] = useState(0),
     [configured, setConfigured] = useState(true);
@@ -18,10 +25,13 @@ export default function Community({ user, navigate }) {
     const controller = new AbortController(),
       timer = setTimeout(() => {
         setLoading(true);
-        setError('');
-        request(`themes&search=${encodeURIComponent(search)}&category=${category}`, {
-          signal: controller.signal,
-        })
+        setError("");
+        request(
+          `themes&search=${encodeURIComponent(search)}&category=${category}`,
+          {
+            signal: controller.signal,
+          },
+        )
           .then((result) => {
             setThemes(result.themes);
             setNext(result.next);
@@ -90,7 +100,7 @@ export default function Community({ user, navigate }) {
           {categories.map((value) => (
             <button
               key={value}
-              className={category === value ? 'active' : ''}
+              className={category === value ? "active" : ""}
               aria-pressed={category === value}
               onClick={() => setCategory(value)}
             >
@@ -102,8 +112,8 @@ export default function Community({ user, navigate }) {
       <div className="collection-summary">
         <span>
           {loading
-            ? 'Finding themes…'
-            : `${themes.length}${next ? '+' : ''} ${themes.length === 1 ? 'theme' : 'themes'}${category !== 'All' ? ` · ${category}` : ''}`}
+            ? "Finding themes…"
+            : `${themes.length}${next ? "+" : ""} ${themes.length === 1 ? "theme" : "themes"}${category !== "All" ? ` · ${category}` : ""}`}
         </span>
         <span>Preview the look. Download the package. Make it yours.</span>
       </div>
@@ -123,12 +133,26 @@ export default function Community({ user, navigate }) {
         <>
           <div className="theme-grid">
             {themes.map((theme) => (
-              <ThemeCard key={theme.id} theme={theme} viewerId={user?.id} navigate={navigate} />
+              <ThemeCard
+                key={theme.id}
+                theme={theme}
+                viewerId={user?.id}
+                navigate={navigate}
+                onDeleted={(id) =>
+                  setThemes((current) =>
+                    current.filter((theme) => theme.id !== id),
+                  )
+                }
+              />
             ))}
           </div>
           {next && (
-            <button className="button load-more" disabled={loading} onClick={loadMore}>
-              {loading ? 'Loading…' : 'More to explore'}
+            <button
+              className="button load-more"
+              disabled={loading}
+              onClick={loadMore}
+            >
+              {loading ? "Loading…" : "More to explore"}
             </button>
           )}
         </>
@@ -138,24 +162,27 @@ export default function Community({ user, navigate }) {
             <Icon name="Grid" size={32} />
           </div>
           <p className="eyebrow">
-            {search || category !== 'All' ? 'A FRESH PERSPECTIVE' : 'A BLANK CANVAS'}
+            {search || category !== "All"
+              ? "A FRESH PERSPECTIVE"
+              : "A BLANK CANVAS"}
           </p>
           <h2>
-            {search || category !== 'All'
-              ? 'Nothing here just yet.'
-              : 'Be the first to set the mood.'}
+            {search || category !== "All"
+              ? "Nothing here just yet."
+              : "Be the first to set the mood."}
           </h2>
           <p>
-            {search || category !== 'All'
-              ? 'Try another search or explore a different category.'
-              : 'A new collection, made by the people who use it. Your theme could be the first.'}
+            {search || category !== "All"
+              ? "Try another search or explore a different category."
+              : "A new collection, made by the people who use it. Your theme could be the first."}
           </p>
           <a className="button primary" href="#/upload">
             Share the first theme <Icon name="ArrowRight" />
           </a>
           {!configured && (
             <small>
-              Accounts and uploads become available when the owner connects Prisma Postgres.
+              Accounts and uploads become available when the owner connects
+              Prisma Postgres.
             </small>
           )}
         </div>

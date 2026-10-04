@@ -10,6 +10,7 @@ Built with React, Vite, Tailwind CSS and Motion, with a Node.js API, Prisma and 
 - Validated ZIP and `.codextheme` uploads, immediate publication and original-file downloads.
 - Accounts, profiles, a 6 × 4 shuffleable Blobatar picker and interactive avatars.
 - Likes, dislikes and comments, with server-enforced administration and moderation.
+- Uploaders can permanently delete their themes from collection/profile cards or the detail page, with confirmation. Deletion removes files, reactions and comments.
 - Optimistic reactions, bounded preview caching and independently loaded pages.
 
 ## Project structure
@@ -67,11 +68,11 @@ The browser calls `/api/community` on the frontend domain. A small Vercel proxy 
 
 Create a Render Node.js web service with Root Directory `back-end` and Node.js 24.
 
-| Setting           | Value                                |
-| ----------------- | ------------------------------------ |
-| Build command     | `npm ci --include=dev && npm run db:generate`      |
-| Start command     | `npm start` |
-| Health check path | `/health`                            |
+| Setting           | Value                                         |
+| ----------------- | --------------------------------------------- |
+| Build command     | `npm ci --include=dev && npm run db:generate` |
+| Start command     | `npm start`                                   |
+| Health check path | `/health`                                     |
 
 The server binds to `0.0.0.0` and Render's supplied `PORT`. Apply `npm run db:migrate` against the intended database before using the service. The build does not apply migrations automatically.
 
