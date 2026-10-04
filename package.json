@@ -1,0 +1,34 @@
+{
+  "name": "codexskin-community",
+  "version": "0.11.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "front-end",
+    "back-end"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace front-end",
+    "build": "npm run db:generate && npm run build --workspace front-end",
+    "preview": "npm run preview --workspace front-end",
+    "test": "npm test --workspace back-end",
+    "test:integration": "npm run test:integration --workspace back-end",
+    "db:generate": "npm run db:generate --workspace back-end",
+    "db:migrate": "npm run db:migrate --workspace back-end",
+    "db:local": "npm run db:local --workspace back-end",
+    "admin": "npm run admin --workspace back-end --",
+    "maintenance": "npm run maintenance --workspace back-end",
+    "format": "prettier --write front-end/src back-end/src back-end/test back-end/scripts api docs README.md \"*.json\" \"front-end/*.{js,json,html}\" \"back-end/*.{mjs,json}\"",
+    "format:check": "prettier --check front-end/src back-end/src back-end/test back-end/scripts api docs README.md \"*.json\" \"front-end/*.{js,json,html}\" \"back-end/*.{mjs,json}\""
+  },
+  "overrides": {
+    "deepmerge-ts": "8.0.2",
+    "mysql2": "3.24.5"
+  },
+  "devDependencies": {
+    "prettier": "3.9.9"
+  }
+}

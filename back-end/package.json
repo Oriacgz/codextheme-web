@@ -1,0 +1,30 @@
+{
+  "name": "@codexskin/back-end",
+  "version": "0.11.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "test:integration": "node scripts/smoke.mjs",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:local": "node scripts/dev-db.mjs",
+    "admin": "node scripts/admin.mjs",
+    "maintenance": "node scripts/cleanup.mjs",
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "@vercel/blob": "2.8.0",
+    "color-string": "^2.1.4",
+    "pg": "8.23.1",
+    "sharp": "0.35.5",
+    "yauzl": "3.4.0"
+  },
+  "devDependencies": {
+    "@prisma/dev": "0.24.17",
+    "prisma": "7.10.0",
+    "yazl": "3.3.1"
+  }
+}

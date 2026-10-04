@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+  engineType = "client"
+}
+datasource db {
+  provider = "postgresql"
+}
+enum Role {
+  USER
+  ADMIN
+}
+enum ThemeStatus {
+  PUBLISHED
+  HIDDEN
+}
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  avatar       Int      @default(0)
+  role         Role     @default(USER)
+  suspended    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  sessions     Session[]
+  themes       Theme[]
+  votes        Vote[]
+  comments     Comment[]
+  uploads      Upload[]
+}
+model Session {
+  hash      String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  @@index([expiresAt])
+}
+model Theme {
+  id          String      @id @default(uuid())
+  name        String
+  description String
+  category    String
+  license     String
+  fingerprint String
+  packagePath String      @unique
+  previewPath String
+  packageSize Int
+  status      ThemeStatus @default(PUBLISHED)
+  featured    Boolean     @default(false)
+  authorId    String
+  author      User        @relation(fields: [authorId], references: [id])
+  createdAt   DateTime    @default(now())
+  votes       Vote[]
+  comments    Comment[]
+  upload      Upload?
+  @@index([status, createdAt])
+  @@unique([authorId, fingerprint])
+}
+model Vote {
+  userId String
+  themeId String
+  value Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme Theme @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  @@id([userId, themeId])
+  @@index([themeId, value])
+}
+model Comment {
+  id String @id @default(uuid())
+  body String
+  hidden Boolean @default(false)
+  userId String
+  themeId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme Theme @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@index([themeId, createdAt])
+}
+model Upload {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pathname String @unique
+  metadata Json
+  expiresAt DateTime
+  themeId String? @unique
+  theme Theme? @relation(fields: [themeId], references: [id])
+  @@index([expiresAt])
+}
+model RateBucket {
+  key String @id
+  count Int @default(1)
+  expiresAt DateTime
+  @@index([expiresAt])
+}
+
