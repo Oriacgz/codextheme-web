@@ -2804,7 +2804,8 @@ body::-webkit-scrollbar {
   margin: 0 18px 16px 0;
 }
 .edit-theme-dialog {
-  width: min(560px, calc(100vw - 32px));
+  margin: auto;
+  width: min(620px, calc(100vw - 32px));
   max-height: calc(100dvh - 40px);
   overflow-y: auto;
   padding: 28px;
@@ -2833,4 +2834,115 @@ body::-webkit-scrollbar {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* Keep published-theme editing compact and independent of upload layout. */
+.edit-theme-dialog {
+  box-shadow: 0 24px 80px rgb(22 40 32 / 20%);
+}
+.edit-theme-dialog .stack-form > fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  display: grid;
+  gap: 18px;
+}
+.stack-form .theme-category-picker > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+  gap: 8px;
+}
+.stack-form .theme-category-picker label {
+  flex-direction: row;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+.stack-form .theme-category-picker label:has(input:checked) {
+  border-color: var(--green);
+  background: #edf3ea;
+  color: var(--green);
+}
+.stack-form .theme-category-picker input,
+.stack-form .rights-confirm input {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+.stack-form label.rights-confirm {
+  flex-direction: row;
+  align-items: flex-start;
+  line-height: 1.5;
+}
+.edit-theme-dialog .form-actions {
+  position: sticky;
+  bottom: -28px;
+  justify-content: flex-end;
+  margin: 0 -28px -28px;
+  padding: 18px 28px;
+  border-top: 1px solid var(--line);
+  background: var(--paper);
+}
+.edit-theme-dialog textarea { min-height: 100px; }
+@media (max-width: 480px) {
+  .edit-theme-dialog { padding: 20px; }
+  .edit-theme-dialog .form-actions {
+    bottom: -20px;
+    margin: 0 -20px -20px;
+    padding: 16px 20px;
+  }
+}
+
+/* Native inputs retain keyboard, label and form behavior. */
+.stack-form :is(.theme-category-picker, .rights-confirm, .check-label) input[type="checkbox"] {
+  appearance: none;
+  flex: 0 0 auto;
+  display: grid;
+  place-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin: 1px 0 0;
+  border: 1.5px solid #8a9e92;
+  border-radius: 5px;
+  background: #fff;
+  cursor: pointer;
+}
+.stack-form :is(.theme-category-picker, .rights-confirm, .check-label) input[type="checkbox"]::before {
+  content: "";
+  width: 9px;
+  height: 5px;
+  border: solid #fff;
+  border-width: 0 0 2px 2px;
+  transform: translateY(-1px) rotate(-45deg);
+  visibility: hidden;
+}
+.stack-form :is(.theme-category-picker, .rights-confirm, .check-label) input[type="checkbox"]:checked {
+  background: var(--green);
+  border-color: var(--green);
+}
+.stack-form :is(.theme-category-picker, .rights-confirm, .check-label) input[type="checkbox"]:checked::before {
+  visibility: visible;
+}
+.stack-form :is(.theme-category-picker, .rights-confirm, .check-label) input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+.stack-form :is(.theme-category-picker, .rights-confirm, .check-label) input[type="checkbox"]:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+@media (forced-colors: active) {
+  .stack-form :is(.theme-category-picker, .rights-confirm, .check-label) input[type="checkbox"] {
+    appearance: auto;
+  }
+  .stack-form :is(.theme-category-picker, .rights-confirm, .check-label) input[type="checkbox"]::before {
+    content: none;
+  }
 }
