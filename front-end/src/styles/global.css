@@ -2850,10 +2850,12 @@ body::-webkit-scrollbar {
 }
 .stack-form .theme-category-picker > div {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 145px), 1fr));
   gap: 8px;
 }
 .stack-form .theme-category-picker label {
+  min-width: 0;
+  overflow-wrap: anywhere;
   flex-direction: row;
   gap: 8px;
   min-height: 40px;
@@ -2944,5 +2946,54 @@ body::-webkit-scrollbar {
   }
   .stack-form :is(.theme-category-picker, .rights-confirm, .check-label) input[type="checkbox"]::before {
     content: none;
+  }
+}
+
+/* Enhanced native select; older browsers retain their accessible menu. */
+@supports (appearance: base-select) {
+  .stack-form select[name="license"],
+  .stack-form select[name="license"]::picker(select) {
+    appearance: base-select;
+  }
+  .stack-form select[name="license"] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+  }
+  .stack-form select[name="license"]::picker-icon {
+    color: var(--green);
+  }
+  .stack-form select[name="license"]::picker(select) {
+    margin-block: 8px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--ink);
+    box-shadow: 0 12px 32px rgb(22 40 32 / 16%);
+  }
+  .stack-form select[name="license"] option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 7px;
+    font-size: 13px;
+    white-space: normal;
+    cursor: pointer;
+  }
+  .stack-form select[name="license"] option:is(:hover, :focus) {
+    background: #f0f4ee;
+  }
+  .stack-form select[name="license"] option:checked {
+    background: #e5eee2;
+    color: var(--green);
+    font-weight: 600;
+  }
+  .stack-form select[name="license"] option::checkmark {
+    color: var(--green);
   }
 }
