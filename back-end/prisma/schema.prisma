@@ -40,6 +40,7 @@ model Theme {
   name        String
   description String
   category    String
+  categories  String[]    @default([])
   license     String
   fingerprint String
   packagePath String      @unique
@@ -54,6 +55,7 @@ model Theme {
   comments    Comment[]
   upload      Upload?
   @@index([status, createdAt])
+  @@index([categories], type: Gin)
   @@unique([authorId, fingerprint])
 }
 model Vote {

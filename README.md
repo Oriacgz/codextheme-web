@@ -157,3 +157,7 @@ Pages preload on navigation intent. The upload SDK loads only when a cloud uploa
 Tap a Blobatar to cycle through all 14 expression presets. Double-tap for an excited bounce. Hold for a thoughtful expression, then sleepy after a longer hold. Drag for a surprised look and release wobble. Vertical touch scrolling remains available. Avatar-picker choices retain normal selection behavior, and reduced-motion preferences disable movement. These reactions are local UI effects and do not change profile data.
 
 All 14 Blobatar presets are available: happy, surprised, wink, smug, love, shy, thinking, sleepy, unsure, scared, sad, angry, sick and relaxed. Regular avatar taps cycle through the full set. Expressions are discovered through avatar gestures; there is no expression menu. Rapid horizontal shaking while holding the avatar produces a brief dizzy reaction on release. Picker tiles continue selecting avatars normally.
+
+## Published theme updates
+
+Uploaders can select multiple categories and edit their published title, description, categories and artwork usage rights. Edit buttons appear on their own cards and detail pages. Files, likes, comments and moderation status are preserved. Deploy the additive database migration before the new backend; see [rollout and compatibility](docs/THEME-PUBLISHING.md).

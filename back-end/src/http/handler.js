@@ -184,7 +184,9 @@ export default async function handler(req, res) {
             ? { authorId: session.user.id }
             : { status: "PUBLISHED", author: { suspended: false } }),
           ...(query ? { name: { contains: query, mode: "insensitive" } } : {}),
-          ...(category && category !== "All" ? { category } : {}),
+          ...(category && category !== "All"
+            ? { OR: [{ categories: { has: category } }, { category }] }
+            : {}),
         },
         include,
         take: 25,
@@ -210,6 +212,21 @@ export default async function handler(req, res) {
           session?.user.role !== "ADMIN")
       )
         fail(404, "Theme not found.");
+      if (method === "PATCH" && !parts[2]) {
+        const { user } = await requireUser(req, database, { write: true });
+        if (user.id !== theme.authorId)
+          fail(403, "Only the uploader can edit this theme.");
+        const metadata = themeMetadata(await jsonBody(req));
+        await rateLimit(database, "theme-edits:" + user.id, 30);
+        const updated = await database.theme.update({
+          where: { id: theme.id },
+          data: metadata,
+          include,
+        });
+        return send(res, {
+          theme: (await decorate(database, [updated], user.id))[0],
+        });
+      }
       if (method === "DELETE" && !parts[2]) {
         const { user } = await requireUser(req, database, { write: true });
         await deleteOwnedTheme(database, theme, user.id);

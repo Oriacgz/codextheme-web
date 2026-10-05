@@ -169,6 +169,13 @@ export default function Profile({ user, ready, setUser, navigate }) {
                 theme={theme}
                 viewerId={user.id}
                 navigate={navigate}
+                onEdited={(updated) =>
+                  setThemes((current) =>
+                    current.map((theme) =>
+                      theme.id === updated.id ? updated : theme,
+                    ),
+                  )
+                }
                 onDeleted={(id) =>
                   setThemes((current) =>
                     current.filter((theme) => theme.id !== id),

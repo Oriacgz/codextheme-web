@@ -1,10 +1,17 @@
+import EditThemeButton from "./EditThemeButton";
 import DeleteThemeButton from "./DeleteThemeButton";
 import { useEffect, useRef, useState } from "react";
 import ThemePreview from "./ThemePreview";
 import Avatar from "./Avatar";
 import Icon from "./Icon";
 import { imageUrl, request } from "../services/api";
-export default function ThemeCard({ theme, viewerId, navigate, onDeleted }) {
+export default function ThemeCard({
+  theme,
+  viewerId,
+  navigate,
+  onDeleted,
+  onEdited,
+}) {
   const element = useRef(null),
     [preview, setPreview] = useState(null),
     [previewError, setPreviewError] = useState(false);
@@ -53,7 +60,7 @@ export default function ThemeCard({ theme, viewerId, navigate, onDeleted }) {
       </button>
       <div className="theme-copy">
         <div className="theme-meta">
-          <span>{theme.category}</span>
+          <span>{(theme.categories || [theme.category]).join(" · ")}</span>
           {theme.featured && <span>EDITOR’S PICK</span>}
         </div>
         <h3>
@@ -68,6 +75,9 @@ export default function ThemeCard({ theme, viewerId, navigate, onDeleted }) {
         >
           View theme <Icon name="ArrowRight" />
         </button>
+        {viewerId === theme.author.id && onEdited && (
+          <EditThemeButton theme={theme} onEdited={onEdited} />
+        )}
         {viewerId === theme.author.id && onDeleted && (
           <DeleteThemeButton theme={theme} onDeleted={onDeleted} />
         )}

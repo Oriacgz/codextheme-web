@@ -1,3 +1,4 @@
+import CategoryPicker from "../components/CategoryPicker";
 import { useEffect, useRef, useState } from "react";
 import Icon from "../components/Icon";
 import { request, getCsrf, endpoint } from "../services/api";
@@ -20,7 +21,13 @@ export default function Upload({ user, ready, navigate }) {
       setError("Choose a ZIP or .codextheme package, up to 32 MiB.");
       return;
     }
-    const values = Object.fromEntries(new FormData(event.currentTarget));
+    const form = new FormData(event.currentTarget);
+    const values = Object.fromEntries(form);
+    const categories = form.getAll("categories");
+    if (!categories.length) {
+      setError("Choose at least one category.");
+      return;
+    }
     if (activeUpload.current) return;
     const controller = new AbortController();
     activeUpload.current = controller;
@@ -33,6 +40,7 @@ export default function Upload({ user, ready, navigate }) {
         signal: controller.signal,
         body: {
           ...values,
+          categories,
           rights: values.rights === "on",
           extension: file.name.split(".").at(-1).toLowerCase(),
         },
@@ -149,16 +157,7 @@ export default function Upload({ user, ready, navigate }) {
               />
             </label>
             <div className="form-columns">
-              <label>
-                Category
-                <select name="category">
-                  {["Dark", "Light", "Nature", "Illustration", "Minimal"].map(
-                    (x) => (
-                      <option key={x}>{x}</option>
-                    ),
-                  )}
-                </select>
-              </label>
+              <CategoryPicker />
               <label>
                 How can others use this artwork?
                 <select name="license" aria-describedby="artwork-rights-help">

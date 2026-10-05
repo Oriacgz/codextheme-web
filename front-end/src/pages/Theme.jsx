@@ -1,3 +1,4 @@
+import EditThemeButton from "../components/EditThemeButton";
 import DeleteThemeButton from "../components/DeleteThemeButton";
 import { applyVote } from "../services/votes";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
@@ -89,7 +90,10 @@ export default function Theme({ id, user, navigate }) {
       </a>
       <header className="theme-detail-heading">
         <div>
-          <p className="eyebrow">{theme.category} / COMMUNITY THEME</p>
+          <p className="eyebrow">
+            {(theme.categories || [theme.category]).join(" · ")} / COMMUNITY
+            THEME
+          </p>
           <h1>{theme.name}</h1>
           <div className="author">
             <Avatar user={theme.author} viewerId={user?.id} size={38} />
@@ -180,6 +184,17 @@ export default function Theme({ id, user, navigate }) {
         </div>
       </div>
 
+      {user?.id === theme.author.id && (
+        <EditThemeButton
+          theme={theme}
+          onEdited={(updated) =>
+            setData((current) => ({
+              ...current,
+              theme: { ...current.theme, ...updated },
+            }))
+          }
+        />
+      )}
       {user?.id === theme.author.id && (
         <DeleteThemeButton
           theme={theme}

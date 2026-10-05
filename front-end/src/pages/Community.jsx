@@ -1,15 +1,9 @@
+import { themeCategories } from "../services/theme-categories";
 import { useEffect, useRef, useState } from "react";
 import { request } from "../services/api";
 import Icon from "../components/Icon";
 import ThemeCard from "../components/ThemeCard";
-const categories = [
-  "All",
-  "Dark",
-  "Light",
-  "Nature",
-  "Illustration",
-  "Minimal",
-];
+const categories = ["All", ...themeCategories];
 export default function Community({ user, navigate }) {
   const [search, setSearch] = useState(""),
     [category, setCategory] = useState("All"),
@@ -148,6 +142,24 @@ export default function Community({ user, navigate }) {
                 theme={theme}
                 viewerId={user?.id}
                 navigate={navigate}
+                onEdited={(updated) =>
+                  setThemes((current) =>
+                    current
+                      .map((theme) =>
+                        theme.id === updated.id ? updated : theme,
+                      )
+                      .filter(
+                        (theme) =>
+                          (category === "All" ||
+                            (theme.categories || [theme.category]).includes(
+                              category,
+                            )) &&
+                          theme.name
+                            .toLowerCase()
+                            .includes(search.slice(0, 80).toLowerCase()),
+                      ),
+                  )
+                }
                 onDeleted={(id) =>
                   setThemes((current) =>
                     current.filter((theme) => theme.id !== id),
