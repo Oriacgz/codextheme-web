@@ -2997,3 +2997,15 @@ body::-webkit-scrollbar {
     color: var(--green);
   }
 }
+
+.upload-form .form-columns:has(.theme-category-picker) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.upload-form fieldset.theme-category-picker {
+  display: block;
+}
+.upload-form .theme-category-picker > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 145px), 1fr));
+  gap: 8px;
+}
