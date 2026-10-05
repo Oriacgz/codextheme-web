@@ -1,39 +1,51 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
-import { createRoot } from 'react-dom/client';
-import { LazyMotion, domAnimation } from 'motion/react';
-import { request, setCsrf } from './services/api';
-import Landing from './pages/Landing';
-const Community = lazy(() => import('./pages/Community'));
-import Icon from './components/Icon';
-import Avatar from './components/Avatar';
-import './styles/global.css';
-const Auth = lazy(() => import('./pages/Auth'));
-const Profile = lazy(() => import('./pages/Profile'));
-const Upload = lazy(() => import('./pages/Upload'));
-const Theme = lazy(() => import('./pages/Theme'));
-const Admin = lazy(() => import('./pages/Admin'));
-const route = () => location.hash.slice(2) || 'home';
+import {
+  Suspense,
+  lazy,
+  useEffect,
+  useLayoutEffect,
+  useTransition,
+  useState,
+} from "react";
+import { createRoot } from "react-dom/client";
+import { LazyMotion, domAnimation } from "motion/react";
+import { request, setCsrf } from "./services/api";
+import Landing from "./pages/Landing";
+import FloatingScrollbar from "./components/FloatingScrollbar";
+import { pageLoaders, preloadLink } from "./services/navigation";
+const Community = lazy(pageLoaders.community);
+import Icon from "./components/Icon";
+import Avatar from "./components/Avatar";
+import "./styles/global.css";
+const Auth = lazy(pageLoaders.login);
+const Profile = lazy(pageLoaders.profile);
+const Upload = lazy(pageLoaders.upload);
+const Theme = lazy(pageLoaders.theme);
+const Admin = lazy(pageLoaders.admin);
+const route = () => location.hash.slice(2) || "home";
 function App() {
+  const [pending, startTransition] = useTransition();
   const [page, setPage] = useState(route),
     [user, setUser] = useState(null),
     [ready, setReady] = useState(false),
     [configured, setConfigured] = useState(true),
-    [authError, setAuthError] = useState('');
+    [authError, setAuthError] = useState("");
   useEffect(() => {
     const listener = () => {
-      setPage(route());
-      window.scrollTo(0, 0);
+      startTransition(() => setPage(route()));
     };
-    window.addEventListener('hashchange', listener);
-    return () => window.removeEventListener('hashchange', listener);
+    window.addEventListener("hashchange", listener);
+    return () => window.removeEventListener("hashchange", listener);
   }, []);
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [page]);
   async function refreshUser() {
     try {
-      const session = await request('session');
+      const session = await request("session");
       setUser(session.user);
       setCsrf(session.csrf);
       setConfigured(session.configured);
-      setAuthError('');
+      setAuthError("");
     } catch (error) {
       setAuthError(error.message);
     } finally {
@@ -44,36 +56,46 @@ function App() {
     void refreshUser();
   }, []);
   function navigate(next) {
-    location.hash = '/' + next;
+    location.hash = "/" + next;
   }
   async function logout() {
     try {
-      await request('logout', { method: 'POST' });
+      await request("logout", { method: "POST" });
       setUser(null);
-      setCsrf('');
-      navigate('home');
+      setCsrf("");
+      navigate("home");
     } catch (error) {
       setAuthError(error.message);
     }
   }
   const context = { user, ready, configured, navigate, refreshUser, setUser };
-  const current = page.split('/')[0];
+  const current = page.split("/")[0];
   return (
     <LazyMotion features={domAnimation}>
-      <div className="site-shell">
+      <div
+        className="site-shell"
+        onPointerOver={preloadLink}
+        onFocus={preloadLink}
+      >
         <header className="site-header">
           <a className="brand" href="#/home">
             <img src="/brand.ico" width="30" height="30" alt="" />
             codexskin<span> / community</span>
           </a>
           <nav aria-label="Main navigation">
-            <a href="#/community" aria-current={current === 'community' ? 'page' : undefined}>
+            <a
+              href="#/community"
+              aria-current={current === "community" ? "page" : undefined}
+            >
               Explore themes
             </a>
-            <a href="#/upload" aria-current={current === 'upload' ? 'page' : undefined}>
+            <a
+              href="#/upload"
+              aria-current={current === "upload" ? "page" : undefined}
+            >
               Share a theme
             </a>
-            {user?.role === 'ADMIN' && <a href="#/admin">Dashboard</a>}
+            {user?.role === "ADMIN" && <a href="#/admin">Dashboard</a>}
           </nav>
           <div className="account-nav">
             {user ? (
@@ -102,7 +124,7 @@ function App() {
             <button onClick={refreshUser}>Retry</button>
           </div>
         )}
-        <main>
+        <main id="page-content" aria-busy={pending}>
           <Suspense
             fallback={
               <div className="page-loading" role="status">
@@ -110,19 +132,19 @@ function App() {
               </div>
             }
           >
-            {current === 'home' ? (
+            {current === "home" ? (
               <Landing {...context} />
-            ) : current === 'community' ? (
+            ) : current === "community" ? (
               <Community {...context} />
-            ) : ['login', 'signup'].includes(current) ? (
-              <Auth {...context} signup={current === 'signup'} />
-            ) : current === 'profile' ? (
+            ) : ["login", "signup"].includes(current) ? (
+              <Auth {...context} signup={current === "signup"} />
+            ) : current === "profile" ? (
               <Profile {...context} />
-            ) : current === 'upload' ? (
+            ) : current === "upload" ? (
               <Upload {...context} />
-            ) : current === 'theme' ? (
-              <Theme key={page} {...context} id={page.split('/')[1]} />
-            ) : current === 'admin' ? (
+            ) : current === "theme" ? (
+              <Theme key={page} {...context} id={page.split("/")[1]} />
+            ) : current === "admin" ? (
               <Admin {...context} />
             ) : (
               <section className="empty-state">
@@ -134,6 +156,7 @@ function App() {
             )}
           </Suspense>
         </main>
+        <FloatingScrollbar />
         <footer className="site-footer">
           <a className="brand" href="#/home">
             codexskin<span> / community</span>
@@ -145,4 +168,4 @@ function App() {
     </LazyMotion>
   );
 }
-createRoot(document.getElementById('root')).render(<App />);
+createRoot(document.getElementById("root")).render(<App />);

@@ -147,3 +147,7 @@ Previews approximate the desktop layout from saved palette, text, opacity, darkn
 See [LICENSE](LICENSE) for this project's license. This project is unofficial and is not affiliated with OpenAI. No external theme artwork is bundled; uploaders are responsible for usage rights and credits.
 
 Blobatar, Reicon and other dependencies retain their respective licenses. Notices are included in `front-end/public/THIRD_PARTY_NOTICES.txt` and `front-end/public/Reicon-LICENSE.txt`.
+
+## Navigation and scrolling
+
+Pages preload on navigation intent. The upload SDK loads only when a cloud upload starts, and leaving the upload page cancels pending client work. A floating scrollbar supports pointer and keyboard controls while preserving wheel/touch scrolling; forced-colors mode restores the native scrollbar. See [performance findings](docs/PERFORMANCE-AUDIT-2026-10-05.md) for measured production latency and hosting limits.

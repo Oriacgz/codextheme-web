@@ -23,27 +23,30 @@ export default function Community({ user, navigate }) {
   useEffect(() => {
     pagination.current?.abort();
     const controller = new AbortController(),
-      timer = setTimeout(() => {
-        setLoading(true);
-        setError("");
-        request(
-          `themes&search=${encodeURIComponent(search)}&category=${category}`,
-          {
-            signal: controller.signal,
-          },
-        )
-          .then((result) => {
-            setThemes(result.themes);
-            setNext(result.next);
-            setConfigured(result.configured);
-          })
-          .catch((e) => {
-            if (!controller.signal.aborted) setError(e.message);
-          })
-          .finally(() => {
-            if (!controller.signal.aborted) setLoading(false);
-          });
-      }, 200);
+      timer = setTimeout(
+        () => {
+          setLoading(true);
+          setError("");
+          request(
+            `themes&search=${encodeURIComponent(search)}&category=${category}`,
+            {
+              signal: controller.signal,
+            },
+          )
+            .then((result) => {
+              setThemes(result.themes);
+              setNext(result.next);
+              setConfigured(result.configured);
+            })
+            .catch((e) => {
+              if (!controller.signal.aborted) setError(e.message);
+            })
+            .finally(() => {
+              if (!controller.signal.aborted) setLoading(false);
+            });
+        },
+        search.trim() ? 200 : 0,
+      );
     return () => {
       clearTimeout(timer);
       controller.abort();
@@ -126,7 +129,14 @@ export default function Community({ user, navigate }) {
       {loading && !themes.length ? (
         <div className="theme-grid" role="status" aria-label="Loading themes">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="skeleton-card" />
+            <div key={i} className="skeleton-card" aria-hidden="true">
+              <div className="skeleton-preview" />
+              <div className="skeleton-copy">
+                <div className="skeleton-line short" />
+                <div className="skeleton-line" />
+                <div className="skeleton-line short" />
+              </div>
+            </div>
           ))}
         </div>
       ) : themes.length ? (

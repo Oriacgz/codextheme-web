@@ -92,8 +92,15 @@ img {
   display: block;
 }
 .site-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
   max-width: 1800px;
   margin: auto;
+}
+.site-shell > main {
+  flex: 1;
+  min-width: 0;
 }
 .site-header {
   min-height: 92px;
@@ -725,7 +732,9 @@ img {
   max-width: 95px;
 }
 .skeleton-card {
-  height: 335px;
+  max-width: 420px;
+  width: 100%;
+  overflow: hidden;
   border-radius: 10px;
   background: #eceee5;
   animation: pulse 1.7s ease-in-out infinite;
@@ -1496,7 +1505,10 @@ progress {
     white-space: nowrap;
   }
   .account-nav .text-button {
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    white-space: nowrap;
   }
   .landing-hero {
     grid-template-columns: 1fr;
@@ -2473,6 +2485,7 @@ progress {
   max-width: 420px;
 }
 .community-page .theme-copy {
+  min-height: 270px;
   padding: 20px;
 }
 .community-page .theme-copy h3 {
@@ -2592,4 +2605,84 @@ progress {
 .delete-theme-dialog p {
   line-height: 1.6;
   margin-bottom: 20px;
+}
+
+.skeleton-preview {
+  aspect-ratio: 16 / 9;
+  background: #e4e8dd;
+}
+.skeleton-copy {
+  min-height: 270px;
+  padding: 20px;
+}
+.skeleton-line {
+  height: 14px;
+  background: #dfe4d7;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+.skeleton-line.short {
+  width: 60%;
+}
+
+/* Native page scrolling stays enabled; a compact overlay provides the visual control. */
+html {
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.floating-scrollbar {
+  position: fixed;
+  z-index: 30;
+  right: 8px;
+  top: 20dvh;
+  height: 60dvh;
+  width: 16px;
+  padding: 0 4px;
+  border-radius: 20px;
+  background: rgb(250 249 245 / 55%);
+  opacity: 0.45;
+  touch-action: none;
+  user-select: none;
+  transition: opacity 0.15s;
+}
+.floating-scrollbar[data-visible="false"] {
+  visibility: hidden;
+  pointer-events: none;
+}
+.floating-scrollbar:hover,
+.floating-scrollbar:focus-visible {
+  opacity: 1;
+}
+.floating-scrollbar:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+.floating-scrollbar-thumb {
+  width: 8px;
+  min-height: 40px;
+  border-radius: 20px;
+  background: var(--green);
+  box-shadow: 0 1px 4px #0002;
+}
+@media (max-width: 600px) {
+  .floating-scrollbar {
+    right: 2px;
+  }
+}
+@media (forced-colors: active) {
+  html {
+    scrollbar-width: auto;
+  }
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    width: auto;
+    height: auto;
+  }
+  .floating-scrollbar {
+    display: none;
+  }
 }
