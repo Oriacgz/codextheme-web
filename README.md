@@ -151,3 +151,7 @@ Blobatar, Reicon and other dependencies retain their respective licenses. Notice
 ## Navigation and scrolling
 
 Pages preload on navigation intent. The upload SDK loads only when a cloud upload starts, and leaving the upload page cancels pending client work. A floating scrollbar supports pointer and keyboard controls while preserving wheel/touch scrolling; forced-colors mode restores the native scrollbar. See [performance findings](docs/PERFORMANCE-AUDIT-2026-10-05.md) for measured production latency and hosting limits.
+
+## Avatar reactions
+
+Tap a Blobatar to cycle happy, surprised, wink and playful expressions. Double-tap for an excited bounce. Hold for a thoughtful expression, then sleepy after a longer hold. Drag for a surprised look and release wobble. Vertical touch scrolling remains available. Avatar-picker choices retain normal selection behavior, and reduced-motion preferences disable movement. These reactions are local UI effects and do not change profile data.

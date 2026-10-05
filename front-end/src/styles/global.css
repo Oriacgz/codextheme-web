@@ -755,9 +755,6 @@ img {
 .avatar-button:hover {
   transform: translateY(-2px);
 }
-.avatar-button.reacting {
-  animation: avatar-bounce 0.45s ease;
-}
 .avatar-button.selected {
   outline: 2px solid var(--green);
   outline-offset: 5px;
@@ -2684,5 +2681,52 @@ body::-webkit-scrollbar {
   }
   .floating-scrollbar {
     display: none;
+  }
+}
+.avatar-button {
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.avatar-body {
+  display: inline-grid;
+  place-items: center;
+}
+.avatar-body[data-motion="tap"] {
+  animation: avatar-bounce 0.45s ease;
+}
+.avatar-body[data-motion="excited"] {
+  animation: avatar-excited 0.55s ease;
+}
+.avatar-body[data-motion="drag"] {
+  transform: translate(var(--avatar-x, 0px), var(--avatar-y, 0px))
+    rotate(var(--avatar-angle, 0deg));
+}
+.avatar-body[data-motion="wobble"] {
+  animation: avatar-wobble 0.45s ease;
+}
+@keyframes avatar-excited {
+  25%,
+  65% {
+    transform: translateY(-7px) scale(1.08);
+  }
+  45% {
+    transform: translateY(0) scale(0.96);
+  }
+}
+@keyframes avatar-wobble {
+  20% {
+    transform: rotate(-12deg);
+  }
+  45% {
+    transform: rotate(9deg);
+  }
+  70% {
+    transform: rotate(-4deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .avatar-body {
+    transform: none !important;
   }
 }

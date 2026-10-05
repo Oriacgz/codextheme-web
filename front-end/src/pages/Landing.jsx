@@ -1,6 +1,6 @@
-import { m, useReducedMotion } from 'motion/react';
-import Icon from '../components/Icon';
-import Avatar from '../components/Avatar';
+import { m, useReducedMotion } from "motion/react";
+import Icon from "../components/Icon";
+import Avatar from "../components/Avatar";
 export default function Landing({ navigate }) {
   const reduce = useReducedMotion();
   return (
@@ -21,11 +21,15 @@ export default function Landing({ navigate }) {
             <em>Your kind of world.</em>
           </h1>
           <p className="hero-intro">
-            A community for the little details that make a workspace feel like yours. Find a theme
-            you love. Share one you made. Make someone’s day.
+            A community for the little details that make a workspace feel like
+            yours. Find a theme you love. Share one you made. Make someone’s
+            day.
           </p>
           <div className="hero-actions">
-            <button className="button primary" onClick={() => navigate('community')}>
+            <button
+              className="button primary"
+              onClick={() => navigate("community")}
+            >
               Find your next theme <Icon name="ArrowRight" />
             </button>
             <a className="text-link" href="#/upload">
@@ -33,15 +37,22 @@ export default function Landing({ navigate }) {
             </a>
           </div>
           <div className="hero-note">
-            <div className="avatar-stack" aria-label="Interactive Blobatar preview">
+            <div
+              className="avatar-stack"
+              aria-label="Interactive Blobatar preview"
+            >
               {[1, 8, 12, 20].map((avatar) => (
-                <Avatar key={avatar} user={{ avatar, name: 'Blobatar' }} size={38} />
+                <Avatar
+                  key={avatar}
+                  user={{ avatar, name: "Blobatar" }}
+                  size={38}
+                />
               ))}
             </div>
             <p>
               A little personality goes a long way.
               <br />
-              <span>Try tapping a face.</span>
+              <span>Tap, hold or drag a face.</span>
             </p>
           </div>
         </m.div>
@@ -106,22 +117,25 @@ export default function Landing({ navigate }) {
           <span>01</span>
           <h3>Find your atmosphere</h3>
           <p>
-            Explore workspaces made by the community, with honest reactions and conversations under
-            every theme.
+            Explore workspaces made by the community, with honest reactions and
+            conversations under every theme.
           </p>
         </article>
         <article>
           <span>02</span>
           <h3>Give your ideas a home</h3>
           <p>
-            Upload your own package, credit the artwork, and let people bring your perspective to
-            their workspace.
+            Upload your own package, credit the artwork, and let people bring
+            your perspective to their workspace.
           </p>
         </article>
         <article>
           <span>03</span>
           <h3>Show up as yourself</h3>
-          <p>Pick a Blobatar, make it yours, and join a community with a little more character.</p>
+          <p>
+            Pick a Blobatar, make it yours, and join a community with a little
+            more character.
+          </p>
         </article>
       </section>
       <section className="landing-invitation">
