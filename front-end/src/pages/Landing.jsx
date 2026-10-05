@@ -52,7 +52,7 @@ export default function Landing({ navigate }) {
             <p>
               A little personality goes a long way.
               <br />
-              <span>Tap, hold or drag a face.</span>
+              <span>Say hello to a face.</span>
             </p>
           </div>
         </m.div>

@@ -1,0 +1,36 @@
+import {
+  idle,
+  happy,
+  sad,
+  mad,
+  surprised,
+  wink,
+  sleepy,
+  smug,
+  unsure,
+  scared,
+  love,
+  shy,
+  sick,
+  thinking,
+} from "blobatar/expression";
+export const avatarExpressions = {
+  happy,
+  surprised,
+  wink,
+  smug,
+  love,
+  shy,
+  thinking,
+  sleepy,
+  unsure,
+  scared,
+  sad,
+  mad,
+  sick,
+  idle,
+  dizzy: { ...unsure, p: { ...unsure.p, rock: 0.8 } },
+};
+export const expressionNames = Object.keys(avatarExpressions).filter(
+  (name) => name !== "dizzy",
+);

@@ -2,20 +2,19 @@ import { memo, useEffect, useRef, useState } from "react";
 import { Blobatar } from "@blobatar/react";
 import { useGaze } from "@blobatar/react/gaze";
 import {
-  happy,
-  surprised,
-  wink,
-  smug,
-  thinking,
-  sleepy,
-} from "blobatar/expression";
+  avatarExpressions,
+  expressionNames,
+} from "../services/avatar-expressions";
 import { useReducedMotion } from "motion/react";
-import { dragIntent, dragPose } from "../services/avatar-gestures";
+import {
+  dragIntent,
+  dragPose,
+  createShakeTracker,
+  trackShake,
+} from "../services/avatar-gestures";
 import "blobatar/motion.css";
 import "blobatar/gaze.css";
 export const avatarName = (index) => `codexskin-community-avatar-${index}`;
-const expressions = { happy, surprised, wink, smug, thinking, sleepy };
-const clicks = ["happy", "surprised", "wink", "smug"];
 
 function Avatar({
   user,
@@ -82,8 +81,9 @@ function Avatar({
       suppressClick.current = true;
       lastTap.current = 0;
       react(
-        active.dragged ? "wink" : "happy",
-        active.dragged ? "wobble" : "tap",
+        active.shaken ? "dizzy" : active.dragged ? "wink" : "happy",
+        active.shaken ? "dizzy" : active.dragged ? "wobble" : "tap",
+        active.shaken ? 2200 : 1100,
       );
     }
     if (event.currentTarget.hasPointerCapture(event.pointerId))
@@ -99,11 +99,7 @@ function Avatar({
           : `React with ${user?.name || "this"}’s avatar`
       }
       aria-pressed={choice ? selected : undefined}
-      title={
-        choice
-          ? "Choose this avatar"
-          : "Tap, double-tap, hold or drag for a reaction"
-      }
+      title={choice ? "Choose this avatar" : "Say hello"}
       data-reaction={reaction || "idle"}
       onContextMenu={(event) => {
         if (!choice) event.preventDefault();
@@ -118,6 +114,8 @@ function Avatar({
           y: event.clientY,
           held: false,
           dragged: false,
+          shaken: false,
+          shake: createShakeTracker(event.clientX, performance.now()),
         };
         gesture.current = active;
         event.currentTarget.setPointerCapture(event.pointerId);
@@ -153,6 +151,11 @@ function Avatar({
           setReaction("surprised");
           setMotion("drag");
         }
+        active.shaken ||= trackShake(
+          active.shake,
+          event.clientX,
+          performance.now(),
+        );
         if (!reduce) {
           const pose = dragPose(dx, dy);
           body.current.style.setProperty("--avatar-x", `${pose.x}px`);
@@ -182,7 +185,9 @@ function Avatar({
             (lastTap.current > 0 && now - lastTap.current < 300));
         lastTap.current = double ? 0 : now;
         react(
-          double ? "surprised" : clicks[count.current++ % clicks.length],
+          double
+            ? "surprised"
+            : expressionNames[count.current++ % expressionNames.length],
           double ? "excited" : "tap",
         );
       }}
@@ -194,7 +199,7 @@ function Avatar({
           size={size}
           background="circle"
           animate={reduce ? undefined : own ? "always" : "hover"}
-          expression={expressions[reaction]}
+          expression={avatarExpressions[reaction]}
         />
       </span>
     </button>

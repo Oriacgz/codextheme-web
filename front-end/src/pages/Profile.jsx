@@ -83,7 +83,7 @@ export default function Profile({ user, ready, setUser, navigate }) {
           />
           <h2>{name}</h2>
           <p>{user.email}</p>
-          <span>Watches your cursor. Reacts to a hello.</span>
+          <span>Your Blobatar has a personality. Say hello.</span>
         </aside>
         <form className="profile-settings stack-form" onSubmit={save}>
           <div>
