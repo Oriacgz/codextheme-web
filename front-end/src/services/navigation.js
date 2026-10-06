@@ -1,4 +1,5 @@
 export const pageLoaders = {
+  download: () => import("../pages/DownloadApp"),
   community: () => import("../pages/Community"),
   login: () => import("../pages/Auth"),
   signup: () => import("../pages/Auth"),

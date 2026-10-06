@@ -252,14 +252,48 @@ try {
   await call(
     `admin/users/${reader.user.id}`,
     "PATCH",
-    { suspended: true },
+    { suspended: true, currentPassword: "Local-Verification-123", reason: "Integration suspension check" },
     author,
   );
   await call("profile", "PATCH", { name: "Reader", avatar: 0 }, reader, 401);
+  const createdAdmin = await call("admin/administrators", "POST", { email: "replacement-" + randomUUID() + "@example.com", name: "Replacement Admin", currentPassword: "Local-Verification-123", reason: "Verify replacement administrator" }, author);
+  users.push(createdAdmin.data.user.id);
+  const replacementRow = await database.user.findUnique({ where: { id: createdAdmin.data.user.id } });
+  const replacementLogin = await call("login", "POST", { email: replacementRow.email, password: createdAdmin.data.temporaryPassword });
+  const replacement = { ...replacementLogin.data, cookie: replacementLogin.cookie };
+  await call("admin", "GET", null, replacement, 403);
+  await call("profile", "PATCH", { name: "Restricted Admin", avatar: 0 }, replacement, 403);
+  await call("admin/password", "POST", { currentPassword: createdAdmin.data.temporaryPassword, password: "Replacement-Strong-456" }, replacement);
+  await call("admin", "GET", null, replacement, 401);
+  const freshLogin = await call("login", "POST", { email: replacementRow.email, password: "Replacement-Strong-456" });
+  const fresh = { ...freshLogin.data, cookie: freshLogin.cookie };
+  await call("admin/administrators/" + fresh.user.id, "DELETE", { currentPassword: "Replacement-Strong-456", reason: "Self deletion rejected" }, fresh, 400);
+  await call("admin/administrators/" + author.user.id, "DELETE", { currentPassword: "Replacement-Strong-456", reason: "Content protection check" }, fresh, 409);
+  await call("admin/administrators/" + fresh.user.id, "DELETE", { currentPassword: "Local-Verification-123", reason: "Remove disposable replacement" }, author);
+  await call("admin", "GET", null, fresh, 401);
+  await call("admin/audit", "GET", null, author);
+  for (const section of ['stats','themes','members','comments']) {
+    const scoped = await call('admin&section='+section, 'GET', null, author);
+    if (section === 'stats') { assert.ok(scoped.data.stats); assert.deepEqual(scoped.data.themes,[]); assert.deepEqual(scoped.data.users,[]); assert.deepEqual(scoped.data.comments,[]); }
+    else { assert.equal(scoped.data.stats,undefined); if(section !== 'themes')assert.deepEqual(scoped.data.themes,[]); if(section !== 'members')assert.deepEqual(scoped.data.users,[]); if(section !== 'comments')assert.deepEqual(scoped.data.comments,[]); }
+  }
+  await call('admin&section=unknown', 'GET', null, author, 400);
+  await call('admin/administrators','POST',{email:'invalid@example.com',name:'Invalid Admin',reason:'Missing reauthentication'},author,403);
+
+  await call('themes/' + theme.id + '/report', 'POST', { reason: 'Review this local integration fixture' }, author);
+  const queue = await call('admin/reports', 'GET', null, author);
+  const report = queue.data.reports.find(r => r.themeId === theme.id);
+  assert.ok(report);
+  await call('admin/reports/' + report.id, 'PATCH', { resolved: true }, author);
+  assert.equal((await database.themeReport.findUnique({ where: { id: report.id } })).resolved, true);
+  await call('admin/analytics&days=7', 'GET', null, author);
+
   console.log(
     "Integration smoke passed: accounts, permissions, uploads, previews, downloads, reactions, comments, moderation and suspension.",
   );
 } finally {
+  await database.themeReport.deleteMany({ where: { userId: { in: users } } });
+  await database.adminAudit.deleteMany({ where: { actorId: { in: users } } });
   await database.upload.deleteMany({ where: { userId: { in: users } } });
   await database.theme.deleteMany({ where: { authorId: { in: users } } });
   await database.user.deleteMany({ where: { id: { in: users } } });

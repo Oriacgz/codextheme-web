@@ -3,6 +3,14 @@ import handler from './http/handler.js';
 import { databaseUrl } from './config/environment.js';
 import { secret } from './auth/security.js';
 
+for (const file of ['.env', '.env.local']) {
+  try {
+    process.loadEnvFile(file);
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+}
+
 if (!databaseUrl()) throw new Error('Database connection is not configured.');
 secret();
 const origin = new URL(process.env.APP_ORIGIN);

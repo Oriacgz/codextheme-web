@@ -91,6 +91,11 @@ test('admin and suspended-account boundaries are enforced by the server', async 
     }),
     { status: 403 },
   );
+  user.role = 'ADMIN';
+  user.mustChangePassword = true;
+  await assert.rejects(requireUser(req, database, { write: true }), { status: 403 });
+  await assert.rejects(requireUser(req, database, { admin: true }), { status: 403 });
+  assert.equal((await requireUser(req, database, { write: true, admin: true, allowTemporary: true })).user.id, 'user');
   user.suspended = true;
   assert.equal(await currentSession(req, database), null);
 });

@@ -17,6 +17,8 @@ try {
     await removeObject(upload.pathname);
     await database.upload.delete({ where: { id: upload.id } });
   }
+  await database.activitySeen.deleteMany({ where: { expiresAt: { lt: now } } });
+  await database.activityDaily.deleteMany({ where: { day: { lt: new Date(Date.now() - 365 * 86400000).toISOString().slice(0, 10) } } });
   await database.session.deleteMany({ where: { expiresAt: { lt: now } } });
   await database.rateBucket.deleteMany({ where: { expiresAt: { lt: now } } });
   console.log(`Removed ${abandoned.length} expired unpublished uploads.`);

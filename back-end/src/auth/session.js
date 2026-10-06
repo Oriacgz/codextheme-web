@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { randomBytes } from "node:crypto";
 import {
   hash,
   SESSION_DAYS,
@@ -8,7 +8,7 @@ import {
   fail,
   setCookie,
   publicUser,
-} from './security.js';
+} from "./security.js";
 export async function currentSession(req, database) {
   const token = sessionToken(req);
   if (!token) return null;
@@ -16,19 +16,32 @@ export async function currentSession(req, database) {
     where: { hash: hash(token) },
     include: { user: true },
   });
-  if (!session || session.expiresAt <= new Date() || session.user.suspended) return null;
+  if (!session || session.expiresAt <= new Date() || session.user.suspended)
+    return null;
   return { user: session.user, token, csrf: csrfFor(token) };
 }
-export async function requireUser(req, database, { write = false, admin = false } = {}) {
+export async function requireUser(
+  req,
+  database,
+  { write = false, admin = false, allowTemporary = false } = {},
+) {
   const session = await currentSession(req, database);
-  if (!session) fail(401, 'Sign in to continue.');
-  if (write && !equal(req.headers['x-csrf-token'] || '', session.csrf))
-    fail(403, 'Refresh the page and try again.');
-  if (admin && session.user.role !== 'ADMIN') fail(403, 'Admin access required.');
+  if (!session) fail(401, "Sign in to continue.");
+  if (write && !equal(req.headers["x-csrf-token"] || "", session.csrf))
+    fail(403, "Refresh the page and try again.");
+  if (admin && session.user.role !== "ADMIN")
+    fail(403, "Admin access required.");
+  if (
+    (write || admin) &&
+    session.user.role === "ADMIN" &&
+    session.user.mustChangePassword &&
+    !allowTemporary
+  )
+    fail(403, "Replace your temporary password before making changes.");
   return session;
 }
 export async function signIn(res, database, user) {
-  const token = randomBytes(32).toString('hex');
+  const token = randomBytes(32).toString("hex");
   await database.session.create({
     data: {
       hash: hash(token),
@@ -37,5 +50,8 @@ export async function signIn(res, database, user) {
     },
   });
   setCookie(res, token);
-  return { user: { ...publicUser(user), email: user.email }, csrf: csrfFor(token) };
+  return {
+    user: { ...publicUser(user), email: user.email },
+    csrf: csrfFor(token),
+  };
 }

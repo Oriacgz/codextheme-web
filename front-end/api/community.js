@@ -32,6 +32,7 @@ export default async function handler(req, res) {
     res.statusCode = response.status;
     for (const name of [
       'content-type',
+      'location',
       'content-disposition',
       'cache-control',
       'etag',

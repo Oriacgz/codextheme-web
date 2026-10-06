@@ -20,6 +20,7 @@ model User {
   passwordHash String
   avatar       Int      @default(0)
   role         Role     @default(USER)
+  mustChangePassword Boolean @default(false)
   suspended    Boolean  @default(false)
   createdAt    DateTime @default(now())
   sessions     Session[]
@@ -96,3 +97,38 @@ model RateBucket {
   @@index([expiresAt])
 }
 
+
+model AdminAudit {
+  id String @id @default(uuid())
+  actorId String
+  targetId String?
+  action String
+  reason String
+  createdAt DateTime @default(now())
+  @@index([createdAt])
+}
+
+model ActivityDaily {
+ day String
+ themeId String
+ kind String
+ count Int @default(0)
+ @@id([day, themeId, kind])
+ @@index([day])
+}
+model ActivitySeen {
+ key String @id
+ expiresAt DateTime
+ @@index([expiresAt])
+}
+
+model ThemeReport {
+ id String @id @default(uuid())
+ userId String
+ themeId String
+ reason String
+ resolved Boolean @default(false)
+ createdAt DateTime @default(now())
+ @@unique([userId,themeId])
+ @@index([resolved,createdAt])
+}

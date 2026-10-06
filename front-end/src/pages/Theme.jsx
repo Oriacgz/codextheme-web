@@ -1,3 +1,5 @@
+import ReportTheme from "../components/ReportTheme";
+import { activityVisitor } from "../services/activity";
 import EditThemeButton from "../components/EditThemeButton";
 import DeleteThemeButton from "../components/DeleteThemeButton";
 import { applyVote } from "../services/votes";
@@ -14,6 +16,7 @@ export default function Theme({ id, user, navigate }) {
     [comment, setComment] = useState(""),
     [refresh, setRefresh] = useState(0);
   const mutation = useRef(null);
+  const tracked = useRef(null);
   useEffect(() => () => mutation.current?.abort(), []);
   useEffect(() => {
     setData(null);
@@ -22,7 +25,23 @@ export default function Theme({ id, user, navigate }) {
   useEffect(() => {
     const controller = new AbortController();
     request("themes/" + id, { signal: controller.signal })
-      .then(setData)
+      .then((result) => {
+        setData(result);
+        if (
+          !controller.signal.aborted &&
+          document.visibilityState === "visible" &&
+          tracked.current !== id && user?.role !== "ADMIN"
+        ) {
+          tracked.current = id;
+          void request("themes/" + id + "/view", {
+            method: "POST",
+            body: { visitor: activityVisitor },
+            signal: controller.signal,
+          }).catch(() => {
+            if (!controller.signal.aborted) tracked.current = null;
+          });
+        }
+      })
       .catch((e) => {
         if (!controller.signal.aborted) setError(e.message);
       });
@@ -201,6 +220,7 @@ export default function Theme({ id, user, navigate }) {
           onDeleted={() => navigate("community")}
         />
       )}
+      <ReportTheme id={id} user={user} />
       <section className="comments-section">
         <div className="section-label">
           <div>

@@ -3009,3 +3009,68 @@ body::-webkit-scrollbar {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 145px), 1fr));
   gap: 8px;
 }
+.admin-access-form { max-width: 620px; padding: 24px; border: 1px solid var(--line); border-radius: 12px; background: #fff; margin-block: 24px; }
+.admin-access-form fieldset { border: 0; padding: 0; display: grid; gap: 18px; min-width: 0; }
+.admin-access .notice code { overflow-wrap: anywhere; }
+.download-intro { color: var(--muted); margin-block: 18px 32px; }
+.download-platforms { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; margin-bottom: 24px; }
+.download-platforms article { padding: 32px; border: 1px solid var(--line); border-radius: 16px; background: #fff; display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
+.release-version { font-size: 30px; }
+.release-hash { font-size: 12px; overflow-wrap: anywhere; }
+.download-platforms pre { white-space: pre-wrap; font: inherit; font-size: 13px; margin-top: 16px; }
+.platform-soon { padding: 8px 12px; border-radius: 8px; background: #edf3ea; color: var(--green); }
+@media(max-width:640px) { .download-platforms { grid-template-columns: 1fr; } .admin-list-heading { flex-wrap: wrap; gap: 16px; } .admin-actions { flex-wrap: wrap; } }
+.admin-table-wrap { overflow-x: auto; margin-block: 18px; }
+.admin-table-wrap table { width: 100%; border-collapse: collapse; text-align: left; }
+.admin-table-wrap :is(th,td) { padding: 12px; border-bottom: 1px solid var(--line); }
+.admin-analytics h3 { margin-top: 24px; }
+.admin-search { display: flex; align-items: flex-end; gap: 12px; margin-block: 20px; }
+.admin-search label { display: grid; flex: 1; gap: 8px; }
+.admin-search input { width: 100%; }
+.admin-tabs { overflow-x: auto; }
+.admin-tabs button { white-space: nowrap; }
+/* Administration workspace */
+.admin-page .page-heading h1 { font-size: clamp(30px,4vw,44px); }
+.admin-page .admin-tabs { gap: 6px; padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: #eef1eb; margin-bottom: 28px; }
+.admin-page .admin-tabs button { padding: 10px 16px; border: 0; border-radius: 8px; color: var(--muted); }
+.admin-page .admin-tabs button[aria-selected="true"] { background: #fff; color: var(--green); box-shadow: 0 2px 5px #203a2810; }
+.admin-page .admin-stats { gap: 14px; margin-block: 22px; }
+.admin-page .admin-stats > div { border: 1px solid var(--line); border-radius: 14px; background: #fff; padding: 22px; box-shadow: 0 3px 12px #203a2805; }
+.admin-page .admin-stats strong { font-size: clamp(26px,3vw,36px); margin-top: 8px; letter-spacing: -.04em; }
+.admin-page .admin-stats span { font-size: 12px; color: var(--muted); }
+.dashboard-panel { padding: 24px; background: #fff; border: 1px solid var(--line); border-radius: 16px; margin-block: 24px; }
+.dashboard-panel h3 { margin: 0 0 6px; font-size: 18px; }
+.dashboard-panel p { color: var(--muted); font-size: 13px; }
+.admin-trend { margin-top: 18px; color: var(--muted); }
+.admin-trend svg { display: block; width: 100%; max-height: 300px; }
+.chart-legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 20px; font-size: 12px; }
+.chart-legend span { display: flex; align-items: center; gap: 7px; }
+.chart-legend i { width: 9px; height: 9px; border-radius: 50%; }
+.chart-data { margin-block: 18px; font-size: 13px; color: var(--muted); }
+.admin-page .admin-search { padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.admin-page .admin-search input { background: #f6f7f3; border: 1px solid transparent; min-height: 44px; border-radius: 8px; }
+.admin-page .admin-search input:focus { border-color: var(--green); outline-offset: 2px; }
+.admin-pagination { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin: 16px 0; }
+.admin-pagination > span { font-size: 13px; padding: 8px 14px; background: #edf2e9; border-radius: 8px; color: var(--green); }
+.admin-pagination .button { min-height: 40px; padding: 8px 16px; }
+.admin-page .admin-list article { border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-block: 10px; background: #fff; gap: 16px; }
+.admin-access { background: #fff; border: 1px solid var(--line); padding: 24px; border-radius: 16px; }
+.admin-access-form { background: #f6f8f3; }
+.admin-access .admin-actions button { border: 1px solid var(--line); padding: 8px 12px; border-radius: 8px; }
+.admin-access .admin-actions button:last-child:not(:disabled) { color: #a14335; }
+.audit-timeline { list-style: none; padding: 0; margin: 24px 0; }
+.audit-timeline li { display: grid; grid-template-columns: 36px minmax(0,1fr); gap: 14px; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: #fff; margin-bottom: 12px; }
+.audit-mark { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: #eaf2e6; color: var(--green); }
+.audit-event-heading { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.audit-event-heading time { color: var(--muted); font-size: 12px; }
+.audit-timeline p { margin-block: 8px; font-size: 13px; }
+.audit-reason { padding: 10px 12px; background: #f6f7f3; border-radius: 8px; }
+.audit-timeline details { font-size: 11px; color: var(--muted); }
+.audit-timeline code { overflow-wrap: anywhere; }
+.report-filters { display: flex; gap: 4px; padding: 4px; background: #eef1eb; border-radius: 9px; }
+.report-filters button { padding: 9px 14px; border-radius: 6px; font-size: 12px; }
+.report-filters button.selected { background: #fff; color: var(--green); }
+.status-pill { display: inline-block; background: #f4eddf; color: #8b6534; padding: 4px 8px; border-radius: 6px; font-size: 11px; }
+.dashboard-empty { padding: 30px; text-align: center; width: 100%; color: var(--muted); }
+.dashboard-empty h3 { color: var(--ink); margin-block: 12px 8px; }
+@media(max-width:640px) { .dashboard-panel,.admin-access { padding: 18px; } .admin-page .admin-stats { grid-template-columns: repeat(2,minmax(0,1fr)); } .admin-pagination { justify-content: center; } .admin-search { flex-wrap: wrap; } .admin-search label { flex-basis: 100%; } .audit-timeline li { padding: 14px; } }

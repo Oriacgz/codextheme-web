@@ -1,3 +1,4 @@
+import { activityVisitor } from "./activity";
 let csrf = '';
 export function setCsrf(value) {
   csrf = value || '';
@@ -36,4 +37,4 @@ export async function request(route, { method = 'GET', body, signal } = {}) {
   return result;
 }
 export const imageUrl = (id) => endpoint(`themes/${id}/image`);
-export const downloadUrl = (id) => endpoint(`themes/${id}/download`);
+export const downloadUrl = (id) => endpoint(`themes/${id}/download&visitor=${activityVisitor}`);

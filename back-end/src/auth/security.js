@@ -58,6 +58,7 @@ export const publicUser = (user) =>
     name: user.name,
     avatar: user.avatar,
     role: user.role,
+    ...(user.role === "ADMIN" && { mustChangePassword: Boolean(user.mustChangePassword) }),
   };
 export const cookieName = () =>
   isProduction() ? "__Host-community_session" : "community_session";

@@ -161,3 +161,25 @@ All 14 Blobatar presets are available: happy, surprised, wink, smug, love, shy, 
 ## Published theme updates
 
 Uploaders can select multiple categories and edit their published title, description, categories and artwork usage rights. Edit buttons appear on their own cards and detail pages. Files, likes, comments and moderation status are preserved. Deploy the additive database migration before the new backend; see [rollout and compatibility](docs/THEME-PUBLISHING.md).
+
+## Dashboard and app downloads
+
+Administrators can create replacement admin accounts, remove admin access and delete an administrator who owns no themes or pending uploads. Password confirmation is required for access changes; a second administrator must remove the starter. New administrators must replace their temporary password before dashboard use. Password changes, suspensions and role changes revoke sessions. Administrator access changes appear in the audit log.
+
+The dashboard includes member/theme/comment search and pagination, suspension/restoration, moderation, a report queue and activity charts. Metrics use an anonymous identifier held only in page memory, deduplicate per theme/action/day within that page session, and exclude signed-in administrators. Reloading starts a new identifier. Downloads are requests, not completed installations. Maintenance removes expired deduplication records and aggregates older than one year.
+
+Download App reads the latest release from the official project GitHub repository. Windows uses a standalone EXE when a matching asset exists; otherwise it clearly offers the published ZIP with extraction instructions. macOS is Coming soon. GitHub release metadata is authoritative; the dashboard does not yet publish release assets.
+
+### Rollout
+
+1. Back up the production database using the database provider's tools.
+2. From `back-end`, run `npm ci --include=dev`, `npm run db:generate` and `npm run db:migrate` with production environment variables configured privately.
+3. Redeploy the Render backend, then the Vercel frontend.
+4. Sign in with the starter credentials and replace the temporary password. Create a replacement admin, sign in as that admin and remove the starter.
+5. Run `npm run maintenance` periodically on the backend for retention and expired upload cleanup.
+
+No new deployment environment variables are required for this delivery. Production migrations and deployments have not been run by the implementation checks. MFA, release draft/publish controls, category analytics and extended member detail/history remain planned enhancements; this is not the complete five-phase plan.
+
+## Latest audit
+
+See [the October 6 audit](docs/AUDIT-2026-10-06.md) for measured dashboard optimizations, security/redirect fixes, verification evidence and remaining scaling limits.

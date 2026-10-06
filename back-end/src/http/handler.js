@@ -1,3 +1,10 @@
+import { reportDashboard, readableAudit } from "../auth/dashboard.js";
+import { recordActivity, activitySummary } from "../themes/activity.js";
+import { latestRelease } from "../themes/releases.js";
+import {
+  changeAdminPassword,
+  manageAdministrator,
+} from "../auth/administrators.js";
 import { deleteOwnedTheme } from "../themes/delete.js";
 import { getThemePreview } from "../themes/preview-cache.js";
 import { databaseUrl } from "../config/environment.js";
@@ -103,6 +110,21 @@ export default async function handler(req, res) {
       return send(res, result);
     }
     if (!["GET", "HEAD"].includes(method)) checkOrigin(req);
+    if (method === "GET" && route === "app-release")
+      return send(res, await latestRelease());
+    if (method === "GET" && route === "app-download") {
+      const release = await latestRelease();
+      await recordActivity(database, {
+        kind: "app-download",
+        visitor: url.searchParams.get("visitor"),
+        admin: (await currentSession(req, database))?.user.role === "ADMIN",
+      }).catch(() => {});
+      res.writeHead(302, {
+        Location: release.url,
+        "Cache-Control": "no-store",
+      });
+      return res.end();
+    }
     if (route === "session" && method === "GET") {
       const session = await currentSession(req, database);
       return send(res, {
@@ -232,6 +254,38 @@ export default async function handler(req, res) {
         await deleteOwnedTheme(database, theme, user.id);
         return send(res, { ok: true });
       }
+      if (method === "POST" && parts[2] === "report" && parts.length === 3) {
+        const { user } = await requireUser(req, database, { write: true });
+        const input = await jsonBody(req);
+        if (
+          typeof input.reason !== "string" ||
+          input.reason.trim().length < 10 ||
+          input.reason.length > 1000
+        )
+          fail(400, "Explain the concern in 10–1000 characters.");
+        await rateLimit(database, "reports:" + user.id, 10);
+        await database.themeReport.upsert({
+          where: { userId_themeId: { userId: user.id, themeId: theme.id } },
+          create: {
+            userId: user.id,
+            themeId: theme.id,
+            reason: input.reason.trim(),
+          },
+          update: { reason: input.reason.trim(), resolved: false },
+        });
+        return send(res, { ok: true });
+      }
+      if (method === "POST" && parts[2] === "view" && parts.length === 3) {
+        const input = await jsonBody(req);
+        await rateLimit(database, "views:" + theme.id, 300);
+        await recordActivity(database, {
+          kind: "view",
+          themeId: theme.id,
+          visitor: input.visitor,
+          admin: session?.user.role === "ADMIN",
+        });
+        return send(res, { ok: true });
+      }
       if (method === "GET" && parts[2] === "preview")
         return send(res, { preview: await getThemePreview(theme) });
       if (method === "GET" && parts[2] === "image") {
@@ -253,6 +307,12 @@ export default async function handler(req, res) {
           `attachment; filename="theme-${theme.id}.zip"`,
         );
         const stream = await packageStream(theme.packagePath);
+        await recordActivity(database, {
+          kind: "download",
+          themeId: theme.id,
+          visitor: url.searchParams.get("visitor"),
+          admin: session?.user.role === "ADMIN",
+        }).catch(() => {});
         stream.on("error", () => res.destroy());
         res.on("close", () => stream.destroy());
         return stream.pipe(res);
@@ -404,8 +464,113 @@ export default async function handler(req, res) {
       const { user } = await requireUser(req, database, {
         write: method !== "GET",
         admin: true,
+        allowTemporary:
+          method === "POST" && parts.length === 2 && parts[1] === "password",
       });
+      if (method === "POST" && parts[1] === "password" && parts.length === 2) {
+        return send(
+          res,
+          await changeAdminPassword(database, user, await jsonBody(req)),
+        );
+      }
+      if (user.mustChangePassword)
+        fail(
+          403,
+          "Replace your temporary password before using the dashboard.",
+        );
+      if (method === "GET" && parts[1] === "analytics")
+        return send(
+          res,
+          await activitySummary(
+            database,
+            Number(new URL(req.url, "http://local").searchParams.get("days")),
+          ),
+        );
+      if (parts[1] === "reports") {
+        if (method === "GET")
+          return send(
+            res,
+            await reportDashboard(
+              database,
+              url.searchParams.get("resolved") === "1",
+            ),
+          );
+        if (method === "PATCH" && parts.length === 3) {
+          uuid(parts[2]);
+          const input = await jsonBody(req);
+          if (typeof input.resolved !== "boolean")
+            fail(400, "Choose a report status.");
+          await database.$transaction(async (tx) => {
+            await tx.themeReport.update({
+              where: { id: parts[2] },
+              data: { resolved: input.resolved },
+            });
+            await tx.adminAudit.create({
+              data: {
+                actorId: user.id,
+                targetId: parts[2],
+                action: "report-status-changed",
+                reason: input.resolved ? "Report resolved" : "Report reopened",
+              },
+            });
+          });
+          return send(res, { ok: true });
+        }
+      }
+      if (parts[1] === "administrators") {
+        if (method === "GET" && parts.length === 2) {
+          return send(res, {
+            users: await database.user.findMany({
+              where: { role: "ADMIN" },
+              select: {
+                ...authorSelect,
+                email: true,
+                suspended: true,
+                mustChangePassword: true,
+              },
+              orderBy: { createdAt: "asc" },
+              take: 100,
+            }),
+          });
+        }
+        if (
+          (method === "POST" && parts.length === 2) ||
+          (["PATCH", "DELETE"].includes(method) && parts.length === 3)
+        ) {
+          if (parts[2]) uuid(parts[2]);
+          return send(
+            res,
+            await manageAdministrator(
+              database,
+              user,
+              method,
+              parts[2],
+              await jsonBody(req),
+            ),
+          );
+        }
+      }
+      if (method === "GET" && parts[1] === "audit" && parts.length === 2) {
+        return send(res, {
+          entries: await readableAudit(database),
+        });
+      }
       if (method === "GET" && parts.length === 1) {
+        const page = Math.min(
+          1000,
+          Math.max(
+            0,
+            Number.parseInt(url.searchParams.get("page") || "0", 10) || 0,
+          ),
+        );
+        const section = url.searchParams.get("section");
+        if (
+          section &&
+          !["stats", "themes", "members", "comments"].includes(section)
+        )
+          fail(400, "Unknown dashboard section.");
+        const totals = !section || section === "stats";
+        const search = (url.searchParams.get("search") || "").slice(0, 80);
         const [
           users,
           themes,
@@ -415,36 +580,59 @@ export default async function handler(req, res) {
           recentUsers,
           recentComments,
         ] = await Promise.all([
-          database.user.count(),
-          database.theme.count(),
-          database.comment.count({ where: { hidden: false } }),
-          database.theme.count({ where: { status: "PUBLISHED" } }),
-          database.theme.findMany({
-            include,
-            take: 50,
-            orderBy: { createdAt: "desc" },
-          }),
-          database.user.findMany({
-            select: {
-              ...authorSelect,
-              email: true,
-              suspended: true,
-              createdAt: true,
-            },
-            take: 50,
-            orderBy: { createdAt: "desc" },
-          }),
-          database.comment.findMany({
-            include: {
-              user: { select: authorSelect },
-              theme: { select: { id: true, name: true } },
-            },
-            take: 50,
-            orderBy: { createdAt: "desc" },
-          }),
+          totals ? database.user.count() : 0,
+          totals ? database.theme.count() : 0,
+          totals ? database.comment.count({ where: { hidden: false } }) : 0,
+          totals ? database.theme.count({ where: { status: "PUBLISHED" } }) : 0,
+          !section || section === "themes"
+            ? database.theme.findMany({
+                include,
+                where: search
+                  ? { name: { contains: search, mode: "insensitive" } }
+                  : {},
+                skip: page * 50,
+                take: 50,
+                orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+              })
+            : [],
+          !section || section === "members"
+            ? database.user.findMany({
+                where: search
+                  ? {
+                      OR: [
+                        { name: { contains: search, mode: "insensitive" } },
+                        { email: { contains: search, mode: "insensitive" } },
+                      ],
+                    }
+                  : {},
+                skip: page * 50,
+                select: {
+                  ...authorSelect,
+                  email: true,
+                  suspended: true,
+                  createdAt: true,
+                },
+                take: 50,
+                orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+              })
+            : [],
+          !section || section === "comments"
+            ? database.comment.findMany({
+                where: search
+                  ? { body: { contains: search, mode: "insensitive" } }
+                  : {},
+                skip: page * 50,
+                include: {
+                  user: { select: authorSelect },
+                  theme: { select: { id: true, name: true } },
+                },
+                take: 50,
+                orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+              })
+            : [],
         ]);
         return send(res, {
-          stats: { users, themes, comments, published },
+          ...(totals && { stats: { users, themes, comments, published } }),
           themes: await decorate(database, uploads, user.id),
           users: recentUsers,
           comments: recentComments.map((c) => ({
@@ -473,13 +661,7 @@ export default async function handler(req, res) {
         const input = await jsonBody(req);
         if (parts[2] === user.id || typeof input.suspended !== "boolean")
           fail(400, "You cannot suspend your own admin account.");
-        await database.$transaction([
-          database.user.update({
-            where: { id: parts[2] },
-            data: { suspended: input.suspended },
-          }),
-          database.session.deleteMany({ where: { userId: parts[2] } }),
-        ]);
+        await manageAdministrator(database, user, "PATCH", parts[2], input);
         return send(res, { ok: true });
       }
     }

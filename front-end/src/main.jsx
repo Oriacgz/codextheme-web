@@ -21,6 +21,7 @@ const Profile = lazy(pageLoaders.profile);
 const Upload = lazy(pageLoaders.upload);
 const Theme = lazy(pageLoaders.theme);
 const Admin = lazy(pageLoaders.admin);
+const DownloadApp = lazy(pageLoaders.download);
 const route = () => location.hash.slice(2) || "home";
 function App() {
   const [pending, startTransition] = useTransition();
@@ -95,6 +96,12 @@ function App() {
             >
               Share a theme
             </a>
+            <a
+              href="#/download"
+              aria-current={current === "download" ? "page" : undefined}
+            >
+              Download App
+            </a>
             {user?.role === "ADMIN" && <a href="#/admin">Dashboard</a>}
           </nav>
           <div className="account-nav">
@@ -144,6 +151,8 @@ function App() {
               <Upload {...context} />
             ) : current === "theme" ? (
               <Theme key={page} {...context} id={page.split("/")[1]} />
+            ) : current === "download" ? (
+              <DownloadApp />
             ) : current === "admin" ? (
               <Admin {...context} />
             ) : (

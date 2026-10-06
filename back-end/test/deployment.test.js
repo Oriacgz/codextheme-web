@@ -71,6 +71,10 @@ test('proxy forwards parsed JSON, cookies and origin; rejects invalid backend co
     const response = await call();
     assert.equal(response.statusCode, 200);
     assert.match(response.headers['set-cookie'][0], /Secure/);
+    globalThis.fetch = async () => new Response(null, { status: 302, headers: { location: 'https://github.com/Oriacgz/codexskin/releases/download/v0.10.0/app.exe' } });
+    const redirect = await call();
+    assert.equal(redirect.statusCode, 302);
+    assert.equal(redirect.headers.location, 'https://github.com/Oriacgz/codexskin/releases/download/v0.10.0/app.exe');
     process.env.BACKEND_URL = 'http://example.onrender.com';
     assert.equal((await call()).statusCode, 502);
   } finally {
